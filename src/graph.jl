@@ -105,7 +105,7 @@ struct SpliceGraph{K}
    edgetype::Vector{EdgeType}
    edgeleft::Vector{SGKmer{K}}
    edgeright::Vector{SGKmer{K}}
-   annopath::Vector{IntSet}
+   annopath::Vector{BitSet}
    annoname::Vector{String}
    annobias::Vector{ExpectedGC}
    seq::SGSequence
@@ -253,14 +253,14 @@ function Base.get( collection::T, key::I, def ) where {T <: Tuple, I <: Integer}
 end
 
 # Functions for iso.jl annotated edges feature
-# Take a RefTx and produce an IntSet through the nodes of a SpliceGraph
-# returns: IntSet
+# Take a RefTx and produce an BitSet through the nodes of a SpliceGraph
+# returns: BitSet
 function build_annotated_path( nodecoord::Vector{CoordInt}, 
                                nodelen::Vector{CoordInt}, 
                                tx::RefTx, strand::Bool )
-   path = IntSet()
+   path = BitSet()
    # this may be `poor form`, but 256 is too big for default!
-   resize!(path.bits, 64) # Deprecated:  = zeros(UInt32,64>>>5)
+   #resize!(path.bits, 64) # Deprecated:  = zeros(UInt32,64>>>5)
    for i in 1:length(tx.acc)
       ind = collect(searchsorted( nodecoord, tx.acc[i], rev=!strand ))[end]
       push!( path, ind )
@@ -277,7 +277,7 @@ end
 function build_paths_edges( nodecoord::Vector{CoordInt},
                             nodelen::Vector{CoordInt},
                             gene::RefGene )
-   paths = Vector{IntSet}()
+   paths = Vector{BitSet}()
    for tx in gene.reftx
       curpath = build_annotated_path( nodecoord, nodelen, tx, gene.info.strand )
       push!( paths, curpath )
@@ -285,7 +285,7 @@ function build_paths_edges( nodecoord::Vector{CoordInt},
    paths
 end
 
-function path_to_seq( path::IntSet, nodeoffset::Vector{CoordInt}, 
+function path_to_seq( path::BitSet, nodeoffset::Vector{CoordInt}, 
                       nodelen::Vector{CoordInt}, seq::SGSequence )
    SGSequence(join( map( x->seq[nodeoffset[x]:(nodeoffset[x]+nodelen[x]-1)], collect(path) ) ))
 end

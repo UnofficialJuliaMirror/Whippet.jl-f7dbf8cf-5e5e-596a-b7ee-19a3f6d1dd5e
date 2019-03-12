@@ -155,7 +155,7 @@ function load_gtf( fh; txbool=true, suppress=false, usebam=false, bamreader=Null
          if suppress
             continue
          elseif !warning
-            println(STDERR, "")
+            println(stderr, "")
             warn("Using low quality Transcript Support Levels (TSL 3+) in your GTF file is not recommended!\nFor more information on TSL, see: http://www.ensembl.org/Help/Glossary?id=492\n\nIf you would like Whippet to ignore these when building its index, use `--suppress-low-tsl` option!\n\n")
          
             warning=true
@@ -270,9 +270,9 @@ function load_gtf( fh; txbool=true, suppress=false, usebam=false, bamreader=Null
    end
 
    if usebam
-      println(STDERR, "Found $novel_ss new splice-sites from BAM file..")
+      println(stderr, "Found $novel_ss new splice-sites from BAM file..")
    end
-   println(STDERR, "Loaded $annot_ss annotated splice-sites from GTF file..")
+   println(stderr, "Loaded $annot_ss annotated splice-sites from GTF file..")
 
    return geneset
 end

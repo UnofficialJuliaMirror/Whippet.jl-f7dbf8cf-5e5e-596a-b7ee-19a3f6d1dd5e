@@ -5,7 +5,7 @@ const dir = abspath( splitdir(@__FILE__)[1] )
 const ver = readline(open(dir * "/../VERSION"))
 
 tic()
-println( STDERR, "Whippet $ver loading and compiling... " )
+println( stderr, "Whippet $ver loading and compiling... " )
 
 using ArgParse
 using Libz
@@ -35,10 +35,10 @@ function main()
 
    args = parse_cmd()
 
-   println(STDERR, " $( round( toq(), 6 ) ) seconds" )
+   println(stderr, " $( round( toq(), 6 ) ) seconds" )
 
    indexpath = fixpath( args["index"] )
-   println(STDERR, "Loading splice graph index... $( indexpath ).jls")
+   println(stderr, "Loading splice graph index... $( indexpath ).jls")
    @timer const lib = open(deserialize, "$( indexpath ).jls")
 
    data = load_tpm_file( fixpath(args["tpm"]) )
@@ -55,7 +55,7 @@ function main()
    close(stream)
    close(io)
 
-   println(STDERR, "Whippet $ver done." )
+   println(stderr, "Whippet $ver done." )
 end
 
 function load_tpm_file( filename::String, header=true )

@@ -5,7 +5,7 @@ const dir = abspath( splitdir(@__FILE__)[1] )
 const ver = chomp(readline(open(dir * "/../VERSION")))
 
 tic()
-println( STDERR, "Whippet $ver loading and compiling... " )
+println( stderr, "Whippet $ver loading and compiling... " )
 
 using Libz
 using ArgParse
@@ -46,12 +46,12 @@ function main()
 
    args = parse_cmd()
 
-   println(STDERR, " $( round( toq(), 6 ) ) seconds" )
+   println(stderr, " $( round( toq(), 6 ) ) seconds" )
 
-   println(STDERR, "Loading splice graph index... $( args["index"] ).jls")
+   println(stderr, "Loading splice graph index... $( args["index"] ).jls")
    @timer const lib = open(deserialize, "$( args["index"] ).jls")
 
-   println(STDERR, "Simulating alternative transcripts of $( args["max-complexity"] ) max-complexity..")
+   println(stderr, "Simulating alternative transcripts of $( args["max-complexity"] ) max-complexity..")
    @timer simulate_genes( lib, anno, args["max-complexity"], output=args["out"], gene_num=args["num-genes"] )
 
 end

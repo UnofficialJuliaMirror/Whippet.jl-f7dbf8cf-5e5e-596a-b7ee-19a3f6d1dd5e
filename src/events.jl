@@ -114,7 +114,7 @@ isconnecting( edge::I, node::T ) where {I <: AbstractInterval, T <: Integer} = e
 
 # this is meant for short arrays when it is faster
 # than using the overhead of a set
-# DEPRECATED, IntSet is very efficient
+# DEPRECATED, BitSet is very efficient
 function unique_push!( arr::Vector{T}, el::T ) where T
    if !( el in arr )
       push!( arr, el )
@@ -133,7 +133,7 @@ mutable struct PsiGraph
    psi::Vector{Float64}
    count::Vector{Float64}
    length::Vector{Float64}
-   nodes::Vector{IntSet}
+   nodes::Vector{BitSet}
    min::NodeInt
    max::NodeInt
 end
@@ -142,7 +142,7 @@ Base.sum( pgraph::PsiGraph ) = sum( pgraph.count )
 Base.sum( ngraph::Nullable{PsiGraph} ) = isnull( ngraph ) ? 
                                          0.0 : convert(Float64, sum( ngraph.value ))
 
-function hasintersect( a::IntSet, b::IntSet )
+function hasintersect( a::BitSet, b::BitSet )
    seta,setb = length(a) > length(b) ? (b,a) : (a,b)
    for elem in seta
       if elem in setb
@@ -152,7 +152,7 @@ function hasintersect( a::IntSet, b::IntSet )
    false
 end
 
-function hasintersect_terminal( a::IntSet, b::IntSet )
+function hasintersect_terminal( a::BitSet, b::BitSet )
    if first(a) == last(b) || first(b) == last(a)
       return true
    else
@@ -219,7 +219,7 @@ end
 # ambiguous counts are then assigned to each graph path using the EM algorithm
 
 function reduce_graph( edges::PsiGraph, graph::PsiGraph=deepcopy(edges), maxit::Int=100, maxiso::Int=1024 )
-   newgraph = PsiGraph( Vector{IntSet}(),  Vector{Float64}(),
+   newgraph = PsiGraph( Vector{BitSet}(),  Vector{Float64}(),
                         Vector{Float64}(), Vector{Float64}(),
                         graph.min, graph.max )
    it = 1
@@ -284,7 +284,7 @@ function Base.push!( pgraph::PsiGraph, edg::I;
                      value_bool=true, length=1.0 ) where I <: AbstractInterval
    push!( pgraph.count, value_bool ? get(edg.value) : 0.0 )
    push!( pgraph.length, value_bool ? length : 0.0 )
-   push!( pgraph.nodes, IntSet([edg.first, edg.last]) )
+   push!( pgraph.nodes, BitSet([edg.first, edg.last]) )
    #reduce_graph_terminal!( pgraph )
    if edg.first < pgraph.min
       pgraph.min = edg.first
@@ -303,10 +303,10 @@ mutable struct AmbigCounts
 end
 
 Base.:(==)( a::AmbigCounts, b::AmbigCounts ) = a.paths == b.paths
-Base.:(==)( a::AmbigCounts, b::IntSet ) = ( a.paths == b )
-Base.:(==)( a::IntSet, b::AmbigCounts ) = ( a == b.paths )
-Base.:(==)( a::Vector{I}, b::IntSet ) where {I <: Integer} = ( b == a )
-function Base.:(==)( iset::IntSet, ivec::Vector{I} ) where I <: Integer
+Base.:(==)( a::AmbigCounts, b::BitSet ) = ( a.paths == b )
+Base.:(==)( a::BitSet, b::AmbigCounts ) = ( a == b.paths )
+Base.:(==)( a::Vector{I}, b::BitSet ) where {I <: Integer} = ( b == a )
+function Base.:(==)( iset::BitSet, ivec::Vector{I} ) where I <: Integer
    length(iset) != length(ivec) && return false
    for intv in ivec
       !(intv in iset) && return false
@@ -395,7 +395,7 @@ end
 function add_node_counts!( ambig::Vector{AmbigCounts}, pgraph::PsiGraph,
                            sgquant::SpliceGraphQuant, bias::Float64 )
 
-   iset = IntSet()
+   iset = BitSet()
    for n in pgraph.min:pgraph.max # lets go through all possible nodes
       for i in 1:length(pgraph.nodes)
          if n in pgraph.nodes[i]
@@ -439,7 +439,7 @@ function add_node_counts!( ambig::Vector{AmbigCounts}, igraph::PsiGraph,
 
    minv = min( egraph.min, igraph.min )
    maxv = max( egraph.max, igraph.max )
-   iset = IntSet()
+   iset = BitSet()
    for n in minv:maxv # lets go through all possible nodes
       for i in 1:length(igraph.nodes)
          if n in igraph.nodes[i]
@@ -487,7 +487,7 @@ end
 # add_edge_counts! for one psigraph, (used in tandem utr)
 function add_edge_counts!( ambig::Vector{AmbigCounts}, pgraph::PsiGraph,
                            sgquant::SpliceGraphQuant )
-   iset = IntSet()
+   iset = BitSet()
    for edg in sgquant.edge
       for i in 1:length(pgraph.nodes)
          if edg in pgraph.nodes[i]
@@ -522,7 +522,7 @@ end
 # add_edge_counts! for two graphs, inc_graph and exc_graph! (used in spliced events)
 function add_edge_counts!( ambig::Vector{AmbigCounts}, igraph::PsiGraph,
                            egraph::PsiGraph, edges::Vector{IntervalValue} )
-   iset = IntSet()
+   iset = BitSet()
    for edg in edges
       for i in 1:length(igraph.nodes)
          if edg in igraph.nodes[i]
@@ -565,12 +565,12 @@ function add_edge_counts!( ambig::Vector{AmbigCounts}, igraph::PsiGraph,
    end
 end
 
-function build_utr_graph( nodes::IntSet, motif::EdgeMotif, sgquant::SpliceGraphQuant )
+function build_utr_graph( nodes::BitSet, motif::EdgeMotif, sgquant::SpliceGraphQuant )
 
    utr_graph = Nullable(PsiGraph( Vector{Float64}(), Vector{Float64}(),
-                                  Vector{Float64}(), Vector{IntSet}(),
+                                  Vector{Float64}(), Vector{BitSet}(),
                                   first(nodes), last(nodes) ))
-   curset = IntSet()
+   curset = BitSet()
 
    while length(nodes) > 0
       if motif == TXST_MOTIF
@@ -594,7 +594,7 @@ function _process_tandem_utr( sg::SpliceGraph, sgquant::SpliceGraphQuant{C,R},
    utr_graph  = Nullable{PsiGraph}()
    ambig_cnt  = Nullable{Vector{AmbigCounts}}()
 
-   used_node  = IntSet()
+   used_node  = BitSet()
    total_cnt  = 0.0
 
    if motif == TXEN_MOTIF
@@ -663,7 +663,7 @@ function _process_spliced( sg::SpliceGraph, sgquant::SpliceGraphQuant,
       if   isconnecting( edg, node )
          if isnull( inc_graph )
             inc_graph = Nullable(PsiGraph( Vector{Float64}(), Vector{Float64}(),
-                                           Vector{Float64}(), Vector{IntSet}(),
+                                           Vector{Float64}(), Vector{BitSet}(),
                                            edg.first, edg.last ))
          end   
          if isnull( ambig_edge )
@@ -675,7 +675,7 @@ function _process_spliced( sg::SpliceGraph, sgquant::SpliceGraphQuant,
       elseif isspanning( edg, node )
          if isnull( exc_graph ) #don't allocate unless there is alt splicing
             exc_graph = Nullable(PsiGraph( Vector{Float64}(), Vector{Float64}(),
-                                           Vector{Float64}(), Vector{IntSet}(),
+                                           Vector{Float64}(), Vector{BitSet}(),
                                            edg.first, edg.last ))
          end
          if isnull( ambig_edge )

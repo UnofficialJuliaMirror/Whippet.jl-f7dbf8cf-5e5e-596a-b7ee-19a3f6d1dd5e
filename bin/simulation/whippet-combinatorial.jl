@@ -5,7 +5,7 @@ const dir = abspath( splitdir(@__FILE__)[1] )
 const ver = chomp(readline(open(dir * "/../VERSION")))
 
 tic()
-println( STDERR, "Whippet $ver loading and compiling... " )
+println( stderr, "Whippet $ver loading and compiling... " )
 
 using Libz
 using ArgParse
@@ -53,12 +53,12 @@ function main()
 
    args = parse_cmd()
 
-   println(STDERR, " $( round( toq(), 6 ) ) seconds" )
+   println(stderr, " $( round( toq(), 6 ) ) seconds" )
 
-   println(STDERR, "Loading splice graph index... $( args["index"] ).jls")
+   println(stderr, "Loading splice graph index... $( args["index"] ).jls")
    @timer const lib = open(deserialize, "$( args["index"] ).jls")
 
-   println(STDERR, "Simulating combinatorial transcripts..")
+   println(stderr, "Simulating combinatorial transcripts..")
    @timer simulate_genes( lib, output=args["out"], 
                                gene_num=args["num-genes"], 
                                offset=args["offset"], 
@@ -193,8 +193,8 @@ function simulate_genes( lib; output="simul_genes", gene_num=length(lib.graphs),
       isocnt  += iso
       junccnt += junc
    end
-   println(STDERR, "$isocnt Unique Isoforms Simulated...")
-   println(STDERR, "$junccnt Unique Exon-exon Junctions..")
+   println(stderr, "$isocnt Unique Isoforms Simulated...")
+   println(stderr, "$junccnt Unique Exon-exon Junctions..")
    close( fastastr )
    close( fastaout )
    close( gtfstr )

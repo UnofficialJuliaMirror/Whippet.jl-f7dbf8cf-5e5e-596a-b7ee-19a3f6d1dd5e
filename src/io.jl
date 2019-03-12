@@ -396,7 +396,7 @@ function output_empty( io::BufOut, motif::EdgeMotif, sg::SpliceGraph, node::Int,
    write( io, "NA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\n" )
 end
 
-function Base.string( is::IntSet )
+function Base.string( is::BitSet )
    str = ""
    for n in is
       str *= string(n) * "-"
@@ -600,9 +600,9 @@ end
 function output_exons( nodecoord::Vector{CoordInt},
                        nodelen::Vector{CoordInt},
                        tx::RefTx, strand::Bool )
-   path = IntSet()
+   path = BitSet()
    # this may be `poor form`, but 256 is too big for default!
-   resize!(path.bits, 64) # Deprecated:  = zeros(UInt32,64>>>5)
+   #resize!(path.bits, 64) # Deprecated:  = zeros(UInt32,64>>>5)
    for i in 1:length(tx.acc)
       ind = collect(searchsorted( nodecoord, tx.acc[i], rev=!strand ))[end]
       push!( path, ind )
@@ -616,7 +616,7 @@ function output_exons( nodecoord::Vector{CoordInt},
    path
 end
 
-function Base.in( nodes::UnitRange, is::IntSet )
+function Base.in( nodes::UnitRange, is::BitSet )
    for i in nodes
       if !(i in is)
          return false
@@ -625,7 +625,7 @@ function Base.in( nodes::UnitRange, is::IntSet )
    return true
 end
 
-function Base.in( nodes::UnitRange, v::Vector{IntSet} )
+function Base.in( nodes::UnitRange, v::Vector{BitSet} )
    for is in v
       if nodes in is
          return true

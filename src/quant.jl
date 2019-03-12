@@ -65,7 +65,7 @@ end
 # reimplementation of to edge code in events.jl
 # we require not just the nodes to exist in the intset
 # but also that they are adjacent in the intset
-function Base.in( first, last, is::IntSet )
+function Base.in( first, last, is::BitSet )
    if first in is &&
       last in is
       for i in first+1:last-1
@@ -78,10 +78,10 @@ function Base.in( first, last, is::IntSet )
    return false
 end
 
-Base.in( edge::I, is::IntSet ) where I <: IntervalValue = in( edge.first, edge.last, is )
+Base.in( edge::I, is::BitSet ) where I <: IntervalValue = in( edge.first, edge.last, is )
 
-# This looks for an edge in a Vector of IntSets using ^
-function Base.in( edge::I, viset::Vector{IntSet} ) where I <: IntervalValue
+# This looks for an edge in a Vector of BitSets using ^
+function Base.in( edge::I, viset::Vector{BitSet} ) where I <: IntervalValue
    for iset in viset
       if edge in iset
          return true
@@ -91,7 +91,7 @@ function Base.in( edge::I, viset::Vector{IntSet} ) where I <: IntervalValue
 end
 
 # For events.jl:
-function inall( edge::I, viset::Vector{IntSet} ) where I <: IntervalValue
+function inall( edge::I, viset::Vector{BitSet} ) where I <: IntervalValue
    inone = false
    for iset in viset
       if edge.first >= first(iset) && edge.last <= last(iset)
@@ -105,7 +105,7 @@ function inall( edge::I, viset::Vector{IntSet} ) where I <: IntervalValue
 end
 
 # each edge in the path must exist in the int set to be true
-function Base.in( path::SGAlignPath, is::IntSet )
+function Base.in( path::SGAlignPath, is::BitSet )
    if length(path) == 1
       if !(path[1].node in is)
          return false
@@ -120,8 +120,8 @@ function Base.in( path::SGAlignPath, is::IntSet )
    return true
 end
 
-Base.in( aln::SGAlignSingle, is::IntSet ) = in( aln.fwd, is )
-Base.in( aln::SGAlignPaired, is::IntSet ) = in( aln.fwd, is ) && in( aln.rev, is )
+Base.in( aln::SGAlignSingle, is::BitSet ) = in( aln.fwd, is )
+Base.in( aln::SGAlignPaired, is::BitSet ) = in( aln.fwd, is ) && in( aln.rev, is )
 
 # This is where we count reads for nodes/edges/circular-edges/effective_lengths
 # bias is an adjusting multiplier for nodecounts to bring them to the same level
@@ -257,7 +257,7 @@ end
 end
 
 assign_path!( graphq::GraphLibQuant{SGAlignSingle}, path::SGAlignSingle, 
-              value, temp_iset::IntSet ) = assign_path!( graphq, path, value ) 
+              value, temp_iset::BitSet ) = assign_path!( graphq, path, value ) 
 
 # This function re-count!'s SGAlignPaths which were not count!'ed originally
 @inbounds function assign_path!( graphq::GraphLibQuant{SGAlignSingle}, path::SGAlignSingle, value )
@@ -281,7 +281,7 @@ assign_path!( graphq::GraphLibQuant{SGAlignSingle}, path::SGAlignSingle,
 end
 
 # This function re-counts paired SGAlignPaths that weren't counted because they were too long, disjointed, or both
-@inbounds function assign_path!( graphq::GraphLibQuant{SGAlignPaired}, path::SGAlignPaired, value, temp_iset::IntSet=IntSet() )
+@inbounds function assign_path!( graphq::GraphLibQuant{SGAlignPaired}, path::SGAlignPaired, value, temp_iset::BitSet=BitSet() )
    const init_gene = path.fwd[1].gene
    const sgquant = graphq.quant[ init_gene ]
 
@@ -326,8 +326,8 @@ end
 # build compatibility classes from SpliceGraphQuant node and edge "counts"
 @inbounds function build_equivalence_classes!( graphq::GraphLibQuant, lib::GraphLib; assign_long=true )
    # initialize re-used data structures
-   iset = IntSet()
-   resize!(iset.bits, 64)
+   iset = BitSet()
+   #resize!(iset.bits, 64)
    temp = Dict{Vector{Int},Float64}()
 
    @inline function handle_iset_value!( idx, value )
@@ -394,7 +394,7 @@ end
 @inbounds function equivalence_class( graphq::GraphLibQuant, 
                                       lib::GraphLib, 
                                       cont::Vector{C}, 
-                                      temp_iset::IntSet=IntSet() ) where C <: SGAlignContainer
+                                      temp_iset::BitSet=BitSet() ) where C <: SGAlignContainer
    matches_all = true
    for path in cont
       const g = path.fwd[1].gene
@@ -428,7 +428,7 @@ mutable struct MultiCompat{R} <: EquivalenceClass
    postassign::Bool
    raw::R
 
-   function MultiCompat{R}( graphq::GraphLibQuant{C,R}, lib::GraphLib, cont::Vector{C}, temp_iset::IntSet=IntSet() ) where {C <: SGAlignContainer, R <: ReadCounter}
+   function MultiCompat{R}( graphq::GraphLibQuant{C,R}, lib::GraphLib, cont::Vector{C}, temp_iset::BitSet=BitSet() ) where {C <: SGAlignContainer, R <: ReadCounter}
       class,matches = equivalence_class( graphq, lib, cont, temp_iset )
       new( class, ones(length(class)) / length(class), 1.0, 1.0, !matches, !matches, zero(R) )
    end
@@ -438,10 +438,10 @@ end
 # equivalence classes
 struct MultiMapping{C <: SGAlignContainer, R <: ReadCounter}
    map::Dict{Vector{C},MultiCompat{R}}
-   iset::IntSet
+   iset::BitSet
     
    function MultiMapping{C,R}() where {C <: SGAlignContainer, R <: ReadCounter}
-      new( Dict{Vector{C},MultiCompat{R}}(), IntSet() )
+      new( Dict{Vector{C},MultiCompat{R}}(), BitSet() )
    end
 end
 
@@ -507,7 +507,7 @@ gc_adjust!( multi::MultiMapping{C,R}, mod::B ) where {C <: SGAlignContainer, R <
    end
 end
 
-function get_class_value( iset::IntSet, compat::MultiCompat )
+function get_class_value( iset::BitSet, compat::MultiCompat )
    value = 0.0
    @inbounds for i in 1:length(compat.class)
       if compat.class[i] in iset

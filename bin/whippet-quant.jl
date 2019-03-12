@@ -5,7 +5,7 @@ const dir = abspath( splitdir(@__FILE__)[1] )
 const ver = readline(open(dir * "/VERSION"))
 
 tic()
-println( STDERR, "Whippet $ver loading and compiling... " )
+println( stderr, "Whippet $ver loading and compiling... " )
 
 using ArgParse
 
@@ -100,11 +100,11 @@ function main()
 
    args = parse_cmd()
 
-   println(STDERR, " $( round( toq(), 6 ) ) seconds" )
+   println(stderr, " $( round( toq(), 6 ) ) seconds" )
 
    indexpath = fixpath( args["index"] )
    indexname = hasextension(indexpath, ".jls") ? indexpath : indexpath * ".jls"
-   println(STDERR, "Loading splice graph index... $indexname")
+   println(stderr, "Loading splice graph index... $indexname")
    @timer const lib = open(deserialize, indexname)
 
    ispaired = args["paired_mate.fastq[.gz]"] != nothing ? true : false
@@ -155,44 +155,44 @@ function main()
    end
 
    if nprocs() > 1
-      println(STDERR, "Whippet does not currrently support nprocs() > 1")
+      println(stderr, "Whippet does not currrently support nprocs() > 1")
       return #TODO: first implementation was too slow, ie too much communication overhead
    else
       if args["url"]
-         println(STDERR, "Streaming reads from...")
+         println(stderr, "Streaming reads from...")
       else
-         println(STDERR, "Processing reads from file...")
+         println(stderr, "Processing reads from file...")
       end
       if ispaired
-         println(STDERR, "FASTQ_1: " * args["filename.fastq[.gz]"])
-         println(STDERR, "FASTQ_2: " * args["paired_mate.fastq[.gz]"])
+         println(stderr, "FASTQ_1: " * args["filename.fastq[.gz]"])
+         println(stderr, "FASTQ_2: " * args["paired_mate.fastq[.gz]"])
          @timer mapped,totreads,readlen = process_paired_reads!( parser, mate_parser, param, lib, quant, multi, mod, 
                                                              sam=args["sam"], qualoffset=enc_offset,
                                                              response=response, mate_response=mate_response, 
                                                              http=args["url"] )
          readlen = round(Int, readlen)
-         println(STDERR, "Finished mapping $mapped paired-end reads of length $readlen each out of a total of $totreads mate-pairs...")
+         println(stderr, "Finished mapping $mapped paired-end reads of length $readlen each out of a total of $totreads mate-pairs...")
       else
-         println(STDERR, "FASTQ: " * args["filename.fastq[.gz]"])
+         println(stderr, "FASTQ: " * args["filename.fastq[.gz]"])
          @timer mapped,totreads,readlen = process_reads!( parser, param, lib, quant, multi, mod, 
                                                        sam=args["sam"], qualoffset=enc_offset,
                                                        response=response, http=args["url"] )
          readlen = round(Int, readlen)
-         println(STDERR, "Finished mapping $mapped single-end reads of length $readlen out of a total of $totreads reads...")
+         println(stderr, "Finished mapping $mapped single-end reads of length $readlen out of a total of $totreads reads...")
       end
    end
 
    # TPM_EM
-   println(STDERR, "Calculating expression values and MLE of equivalence classes with EM:")
+   println(stderr, "Calculating expression values and MLE of equivalence classes with EM:")
    primer_normalize!( mod )
    primer_adjust!( quant, mod )
    primer_adjust!( multi, mod )
-   println(STDERR, "- $( length(multi.map) ) multi-gene mapping read equivalence classes...")
+   println(stderr, "- $( length(multi.map) ) multi-gene mapping read equivalence classes...")
    build_equivalence_classes!( quant, lib, assign_long=true )
-   println(STDERR, "- $( length(quant.classes) ) multi-isoform equivalence classes...")
+   println(stderr, "- $( length(quant.classes) ) multi-isoform equivalence classes...")
    calculate_tpm!( quant, readlen=readlen )
    @timer iter = gene_em!( quant, multi, sig=1, readlen=readlen, maxit=10000 ) 
-   println(STDERR, "Finished calculating transcripts per million (TpM) after $iter iterations of EM...")
+   println(stderr, "Finished calculating transcripts per million (TpM) after $iter iterations of EM...")
    set_gene_tpm!( quant, lib )
    gc_normalize!( mod, lib, quant )
    gc_adjust!( quant, mod )
@@ -202,14 +202,14 @@ function main()
    output_stats( args["out"] * ".map.gz", lib, quant, param, indexpath, totreads, mapped, Int(round(total_multi(multi))), readlen, ver )
    output_junctions( args["out"] * ".jnc.gz", lib, quant )
 
-   println(STDERR, "Assigning multi-mapping reads based on maximum likelihood estimate..")
+   println(stderr, "Assigning multi-mapping reads based on maximum likelihood estimate..")
    # Now assign multi to edges.
    @timer assign_ambig!( quant, lib, multi )
 
    effective_lengths!( lib, quant, 1, 0)
-   println(STDERR, "Calculating maximum likelihood estimate of events..." )
+   println(stderr, "Calculating maximum likelihood estimate of events..." )
    @timer process_events( args["out"] * ".psi.gz" , lib, quant, isnodeok=false, iscircok=args["circ"], readlen=readlen )
-   println(STDERR, "Whippet $ver done." )
+   println(stderr, "Whippet $ver done." )
 end
 
 @timer main()

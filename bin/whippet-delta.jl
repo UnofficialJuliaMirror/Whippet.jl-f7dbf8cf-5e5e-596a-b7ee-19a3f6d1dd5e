@@ -5,7 +5,7 @@ const dir = abspath( splitdir(@__FILE__)[1] )
 const ver = chomp(readline(open(dir * "/VERSION")))
 
 tic()
-println( STDERR, "Whippet $ver loading and compiling... " )
+println( stderr, "Whippet $ver loading and compiling... " )
 
 using ArgParse
 using Glob
@@ -80,13 +80,13 @@ end
 
 function main()
    args  = parse_cmd()
-   println(STDERR, " $( round( toq(), 6 ) ) seconds" )
+   println(stderr, " $( round( toq(), 6 ) ) seconds" )
    srand( args["seed"] )
    dir   = fixpath( args["directory"] )
    lista = retrievefilelist( args["a"], dir )
    listb = retrievefilelist( args["b"], dir )
-   println(STDERR, "Sample A: $(join(map(basename, lista), ','))")
-   println(STDERR, "Sample B: $(join(map(basename, listb), ','))")
+   println(stderr, "Sample A: $(join(map(basename, lista), ','))")
+   println(stderr, "Sample B: $(join(map(basename, listb), ','))")
    if length(lista) <= 0 || length(listb) <= 0
       error("Unable to match files! length(a) == $(length(lista)), length(b) == $(length(listb))!")
    end
@@ -94,7 +94,7 @@ function main()
    astreams = open_streams( lista )
    bstreams = open_streams( listb )   
 
-   println(STDERR, "Now processing files and calculating posterior distributions...") 
+   println(stderr, "Now processing files and calculating posterior distributions...") 
    @timer process_psi_files( args["out"] * ".diff.gz", astreams, bstreams, 
                              min_samp=args["min-samples"], 
                              min_reads=args["min-reads"],
@@ -102,7 +102,7 @@ function main()
                              size=args["emperical-size"],
                              point_est=!args["use-depth"], 
                              pseudo_adj=args["pseudo-adjust"]) 
-   println(STDERR, "Whippet $ver done." )
+   println(stderr, "Whippet $ver done." )
 end
 
 @timer main()
