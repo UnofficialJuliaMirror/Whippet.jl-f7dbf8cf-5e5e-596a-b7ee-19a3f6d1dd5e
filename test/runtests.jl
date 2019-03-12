@@ -15,7 +15,6 @@ using IntArrays
 using IntervalTrees
 using Libz
 using Distributions
-using Requests
 
 include("../src/types.jl")
 include("../src/timer.jl")
