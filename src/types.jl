@@ -60,9 +60,8 @@ fixpath( str::String ) = abspath( expanduser( str ) )
 isgzipped( filename::String ) = hasextension( filename, "gz" )
 
 function hasextension( filename::String, ext::String )
-   restr = "\.$ext\$"
-   re = Base.match(Regex(restr), filename)
-   return re == nothing ? false : true
+   restr = "\\.$ext\$"
+   occursin(restr, filename)
 end
 
 function increment!( dict::Dict{K,V}, key::K, val::V=one(V) ) where {K,V}
