@@ -72,3 +72,5 @@ function increment!( dict::Dict{K,V}, key::K, val::V=one(V) ) where {K,V}
    end
    dict
 end
+
+isnothing(x) = x === nothing

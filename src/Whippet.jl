@@ -17,6 +17,7 @@ using IntArrays
 using IntervalTrees
 using Libz
 using Distributions
+using Nullables
 
 include("types.jl")
 include("timer.jl")
