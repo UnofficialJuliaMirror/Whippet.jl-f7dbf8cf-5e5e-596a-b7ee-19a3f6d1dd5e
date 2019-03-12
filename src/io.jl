@@ -373,7 +373,7 @@ function output_circular( io::BufOut, sg::SpliceGraph, sgquant::SpliceGraphQuant
       psi = fore_cnt / total_reads
       if !isnan(psi) && total_reads > 0
          tab_write( io, info[1] )
-         tab_write( io, string(st) * "\-" * string(en) )
+         tab_write( io, string(st) * "-" * string(en) )
          coord_write( io, info[2], sg.nodecoord[st]+sg.nodelen[st]-1, sg.nodecoord[en], tab=true )
          tab_write( io, info[3] )
          tab_write( io, "BS" )
