@@ -6,6 +6,7 @@ importall BioAlignments
 importall IntervalTrees
 
 using DataStructures
+using Nullables
 using BufferedStreams
 using BioSequences
 using BioSymbols
