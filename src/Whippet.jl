@@ -2,9 +2,9 @@ __precompile__()
 
 module Whippet
 
-importall BioSymbols
-importall BioSequences
-importall BioAlignments
+#importall BioSymbols
+#importall BioSequences
+#importall BioAlignments
 
 import DataStructures: SortedSet
 

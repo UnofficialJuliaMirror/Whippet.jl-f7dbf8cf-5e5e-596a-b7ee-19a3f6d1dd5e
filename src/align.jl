@@ -430,7 +430,7 @@ end
    mistol       = mistolerance(align)
 
    if length(align.path) <= 0 || align.path[1].gene != geneind || align.path[1].node != nodeidx
-      unshift!( align.path, SGAlignNode( geneind, nodeidx, zero(SGAlignScore) ) ) # starting node if not already there
+      pushfirst!( align.path, SGAlignNode( geneind, nodeidx, zero(SGAlignScore) ) ) # starting node if not already there
    end
 
    @inline function spliced_rev_extend( geneind::NodeInt, edgeind::CoordInt,
@@ -472,7 +472,7 @@ end
                   ridx    -= p.kmer_size - 1 
                   sgidx   -= p.kmer_size - 1 
                   nodeidx -= 0x01
-                  unshift!( align.path, SGAlignNode( geneind, nodeidx, match(SGAlignScore, p.kmer_size - 1) ) )
+                  pushfirst!( align.path, SGAlignNode( geneind, nodeidx, match(SGAlignScore, p.kmer_size - 1) ) )
                   align.isvalid = true
                else
                   align = spliced_rev_extend( geneind, nodeidx, ridx, lkmer_ind, align ) 
@@ -486,7 +486,7 @@ end
                end
                push!(get(passed_edges), length(align.path)-1)
                nodeidx -= 0x01
-               unshift!( align.path, SGAlignNode( geneind, nodeidx, zero(SGAlignScore) ) )
+               pushfirst!( align.path, SGAlignNode( geneind, nodeidx, zero(SGAlignScore) ) )
          elseif sg.edgetype[nodeidx] == EDGETYPE_SR # 'SR'
                if ridx >= p.kmer_size
                   # obligate spliced_extension
@@ -501,7 +501,7 @@ end
          else #'LL' || 'RS' || 'SL'
                # ignore 'LL' and 'RS'
                nodeidx -= 0x01
-               nodeidx > 0 && unshift!( align.path, SGAlignNode( geneind, nodeidx, zero(SGAlignScore) ) ) 
+               nodeidx > 0 && pushfirst!( align.path, SGAlignNode( geneind, nodeidx, zero(SGAlignScore) ) ) 
          end
          # ignore 'N'
       end

@@ -182,7 +182,7 @@ struct GraphLibQuant{C <: SGAlignContainer, R <: ReadCounter}
       leng    = zeros( isolen )
       geneoff = zeros(Int, length(lib.graphs))
       genetpm = zeros( length(lib.graphs) )
-      quant   = Vector{SpliceGraphQuant}( length(lib.graphs) )
+      quant   = Vector{SpliceGraphQuant}(undef, length(lib.graphs) )
       classes = Vector{IsoCompat}()
       cumul_i = 0
       for i in 1:length(lib.graphs)

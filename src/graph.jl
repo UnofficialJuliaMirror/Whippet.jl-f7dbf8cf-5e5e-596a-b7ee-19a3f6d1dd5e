@@ -221,7 +221,7 @@ function stranded_push!( collection, value, strand::Bool )
    if strand
       push!( collection, value )
    else # '-' strand
-      unshift!( collection, value )
+      pushfirst!( collection, value )
    end
 end
 
