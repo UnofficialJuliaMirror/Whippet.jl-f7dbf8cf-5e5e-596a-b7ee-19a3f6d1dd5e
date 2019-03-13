@@ -79,7 +79,7 @@ function ungapped_align( p::AlignParam, lib::GraphLib, fwd::FASTQRecord, rev::FA
             fwd_aln = _ungapped_align( p, lib, fwd, fwd_sorted[fidx], fwd_readloc; ispos=ispos, geneind=geneind )
             rev_aln = _ungapped_align( p, lib, rev, rev_sorted[ridx], rev_readloc; ispos=!ispos, geneind=geneind )
 
-            @fastmath const scvar = identity( fwd_aln, rev_aln, fwd_len, rev_len )
+            @fastmath scvar = identity( fwd_aln, rev_aln, fwd_len, rev_len )
 
             if isvalid(fwd_aln) && isvalid(rev_aln)
                if isnull( fwd_res ) || isnull( rev_res )

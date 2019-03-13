@@ -148,7 +148,7 @@ function SpliceGraph( gene::RefGene, genome::SGSequence, k::Int )
                          get(gene.acc,  idx[2], def),
                          get(gene.don,  idx[3], def),
                          get(gene.txst, idx[4], def) ]
-      indmin( retarr ), min( retarr... )
+      argmin( retarr ), min( retarr... )
    end
 
    while( idx[1] <= alen || idx[2] <= dlen || idx[3] <= slen || idx[4] <= plen )    

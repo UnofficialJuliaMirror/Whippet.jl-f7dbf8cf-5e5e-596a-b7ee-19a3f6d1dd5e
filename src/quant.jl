@@ -261,15 +261,15 @@ assign_path!( graphq::GraphLibQuant{SGAlignSingle}, path::SGAlignSingle,
 
 # This function re-count!'s SGAlignPaths which were not count!'ed originally
 @inbounds function assign_path!( graphq::GraphLibQuant{SGAlignSingle}, path::SGAlignSingle, value )
-   const init_gene = path.fwd[1].gene
-   const sgquant = graphq.quant[ init_gene ]
+   init_gene = path.fwd[1].gene
+   sgquant = graphq.quant[ init_gene ]
 
    if length(path.fwd) == 1
       push!( sgquant.node[ path.fwd[1].node ], value )
    else
       for i in 1:length(path.fwd)-1
-         const lnode = path.fwd[i].node
-         const rnode = path.fwd[i+1].node
+         lnode = path.fwd[i].node
+         rnode = path.fwd[i+1].node
          if lnode < rnode
             interv = Interval{ExonInt}( lnode, rnode )
             pushzero!( sgquant.edge, interv, value )
@@ -282,16 +282,16 @@ end
 
 # This function re-counts paired SGAlignPaths that weren't counted because they were too long, disjointed, or both
 @inbounds function assign_path!( graphq::GraphLibQuant{SGAlignPaired}, path::SGAlignPaired, value, temp_iset::BitSet=BitSet() )
-   const init_gene = path.fwd[1].gene
-   const sgquant = graphq.quant[ init_gene ]
+   init_gene = path.fwd[1].gene
+   sgquant = graphq.quant[ init_gene ]
 
    if length(path.fwd) == 1
       push!( sgquant.node[ path.fwd[1].node ], value )
       push!( temp_iset, path.fwd[1].node )
    else
       for i in 1:length(path.fwd)-1
-         const lnode = path.fwd[i].node
-         const rnode = path.fwd[i+1].node
+         lnode = path.fwd[i].node
+         rnode = path.fwd[i+1].node
          push!(temp_iset, lnode)
          push!(temp_iset, rnode)
          if lnode < rnode
@@ -309,8 +309,8 @@ end
       end
    else
       for i in 1:length(path.rev)-1
-         const lnode = path.rev[i].node
-         const rnode = path.rev[i+1].node
+         lnode = path.rev[i].node
+         rnode = path.rev[i+1].node
          (lnode in temp_iset && rnode in temp_iset) && continue
          if lnode < rnode
             interv = Interval{ExonInt}( lnode, rnode )
@@ -397,7 +397,7 @@ end
                                       temp_iset::BitSet=BitSet() ) where C <: SGAlignContainer
    matches_all = true
    for path in cont
-      const g = path.fwd[1].gene
+      g = path.fwd[1].gene
       has_match = false
       for p in 1:length(lib.graphs[g].annopath)
          if path in lib.graphs[g].annopath[p]
@@ -499,7 +499,7 @@ gc_adjust!( multi::MultiMapping{C,R}, mod::B ) where {C <: SGAlignContainer, R <
 @inbounds function set_equivalence_class!( multi::MultiMapping{C,R}, graphq::GraphLibQuant,
                                            lib::GraphLib, aln::C ) where {C <: SGAlignContainer, R <: ReadCounter}
    empty!(multi.iset)
-   const g = aln.fwd[1].gene
+   g = aln.fwd[1].gene
    for p in 1:length(lib.graphs[g].annopath)
       if aln in lib.graphs[g].annopath[p]
          push!(multi.iset, p + graphq.geneidx[g])
