@@ -9,6 +9,10 @@ module Whippet
 import DataStructures: SortedSet
 
 using Base: midpoints
+using Nullables
+using Printf
+using Distributions
+
 using BioSequences
 using BioAlignments
 using BufferedStreams
@@ -16,8 +20,6 @@ using FMIndexes
 using IntArrays
 using IntervalTrees
 using Libz
-using Distributions
-using Nullables
 
 include("types.jl")
 include("timer.jl")
